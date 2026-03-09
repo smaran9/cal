@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decimal ↔ Binary Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #4facfe);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            min-height: 100vh;
+            display: block;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: float 20s linear infinite;
+            pointer-events: none;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+            padding: 48px;
+            max-width: 550px;
+            width: 100%;
+            margin: 20px auto;
+            position: relative;
+            z-index: 1;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 36px;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .icon {
+            font-size: 42px;
+            display: inline-block;
+            animation: pulse 2s ease-in-out infinite;
+            margin-bottom: 10px;
+        }
+
+        .converter-section {
+            margin-bottom: 30px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 28px;
+            background: #f5f7ff;
+            padding: 6px;
+            border-radius: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            color: #666;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: #667eea;
+            transform: translateY(-1px);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e8ecf1;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Courier New', monospace;
+            background: #f8fafc;
+            font-weight: 500;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .input-group input::placeholder {
+            color: #aaa;
+        }
+
+        .convert-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 24px;
+            letter-spacing: 0.5px;
+            position: relative;
+        }
+
+        .convert-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: left 0.4s ease;
+        }
+
+        .convert-btn:hover::before {
+            left: 100%;
+        }
+
+        .convert-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .convert-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .result-section {
+            background: linear-gradient(135deg, #f5f7ff 0%, #faf6ff 100%);
+            border-radius: 18px;
+            padding: 24px;
+            border-left: 5px solid #667eea;
+            margin-bottom: 24px;
+            display: none;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.1);
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        .result-section.active {
+            display: block;
+            animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .result-item {
+            margin-bottom: 18px;
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .result-label {
+            color: #667eea;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .result-value {
+            background: white;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            color: #333;
+            word-break: break-all;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+            border: 2px solid #e8ecf1;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .info-card {
+            background: white;
+            padding: 12px;
+            border-radius: 10px;
+            border-left: 3px solid #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+        }
+
+        .info-card-label {
+            color: #667eea;
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .info-card-value {
+            color: #333;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+
+        .info-full {
+            grid-column: 1 / -1;
+        }
+
+        .copy-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.2);
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 6px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .copy-btn:active {
+            transform: translateY(-50%) scale(0.98);
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #fee 0%, #fef5f5 100%);
+            border: 2px solid #ff6b6b;
+            color: #c92a2a;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 18px;
+            display: none;
+            font-size: 14px;
+            font-weight: 500;
+            animation: shakeIn 0.4s ease;
+            border-left: 5px solid #ff6b6b;
+        }
+
+        @keyframes shakeIn {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            border-left: 5px solid #2196F3;
+            padding: 18px;
+            border-radius: 12px;
+            color: #0277bd;
+            font-size: 13px;
+            margin-top: 24px;
+            line-height: 1.8;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.1);
+            font-weight: 500;
+        }
+
+        .info-box strong {
+            color: #01579b;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .history-title {
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 12px;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        .history-item {
+            background: linear-gradient(135deg, #f8f9fa 0%, #f5f7ff 100%);
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin-bottom: 6px;
+            color: #555;
+            display: flex;
+            justify-content: space-between;
+            font-family: 'Courier New', monospace;
+            border-left: 3px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            background: linear-gradient(135deg, #f5f7ff 0%, #f0ebff 100%);
+            transform: translateX(4px);
+        }
+
+        .footer {
+            text-align: center;
+            color: #aaa;
+            font-size: 12px;
+            margin-top: 32px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 600px) {
+            body {
+                padding: 16px;
+            }
+
+            .container {
+                padding: 32px 24px;
+                border-radius: 24px;
+                margin: 16px auto;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .tab-buttons {
+                gap: 6px;
+                padding: 4px;
+            }
+
+            .tab-btn {
+                min-width: 70px;
+                padding: 10px;
+                font-size: 12px;
+            }
+
+            .icon {
+                font-size: 36px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-full {
+                grid-column: 1;
+            }
+
+            .convert-btn {
+                padding: 14px;
+                font-size: 15px;
+            }
+
+            .result-value {
+                font-size: 16px;
+            }
+
+            .info-box {
+                font-size: 12px;
+                padding: 14px;
+                line-height: 1.6;
+            }
+        }
+
+        @media (max-width: 400px) {
+            body {
+                padding: 12px;
+            }
+
+            .container {
+                padding: 24px 16px;
+                margin: 12px auto;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .tab-btn {
+                min-width: 50px;
+                padding: 8px;
+                font-size: 11px;
+            }
+
+            .icon {
+                font-size: 32px;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .conversion-history {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 2px solid #e8ecf1;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">⚙️</div>
+            <h1>Number System Converter</h1>
+            <p>✨ Transform between Decimal and Binary formats instantly</p>
+        </div>
+
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab('dec-to-bin')">
+                Dec → Bin
+            </button>
+            <button class="tab-btn" onclick="switchTab('bin-to-dec')">
+                Bin → Dec
+            </button>
+            <button class="tab-btn" onclick="switchTab('dec-to-hex')">
+                Dec → Hex
+            </button>
+            <button class="tab-btn" onclick="switchTab('hex-to-dec')">
+                Hex → Dec
+            </button>
+            <button class="tab-btn" onclick="switchTab('binary-info')">
+                📊 Info
+            </button>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <!-- Decimal to Binary -->
+        <div id="dec-to-bin" class="converter-section active">
+            <div class="input-group">
+                <label for="decimalInput">Enter Decimal Number:</label>
+                <input 
+                    type="number" 
+                    id="decimalInput" 
+                    placeholder="e.g., 42" 
+                    onkeypress="if(event.key === 'Enter') convertDecimalToBinary()"
+                >
+            </div>
+            <button class="convert-btn" onclick="convertDecimalToBinary()">Convert to Binary</button>
+        </div>
+
+        <!-- Binary to Decimal -->
+        <div id="bin-to-dec" class="converter-section">
+            <div class="input-group">
+                <label for="binaryInput">Enter Binary Number:</label>
+                <input 
+                    type="text" 
+                    id="binaryInput" 
+                    placeholder="e.g., 101010" 
+                    onkeypress="if(event.key === 'Enter') convertBinaryToDecimal()"
+                >
+            </div>
+            <button class="convert-btn" onclick="convertBinaryToDecimal()">Convert to Decimal</button>
+        </div>
+
+        <!-- Decimal to Hex -->
+        <div id="dec-to-hex" class="converter-section">
+            <div class="input-group">
+                <label for="decimalInputHex">Enter Decimal Number:</label>
+                <input 
+                    type="number" 
+                    id="decimalInputHex" 
+                    placeholder="e.g., 255" 
+                    onkeypress="if(event.key === 'Enter') convertDecimalToHex()"
+                >
+            </div>
+            <button class="convert-btn" onclick="convertDecimalToHex()">Convert to Hexadecimal</button>
+        </div>
+
+        <!-- Hex to Decimal -->
+        <div id="hex-to-dec" class="converter-section">
+            <div class="input-group">
+                <label for="hexInput">Enter Hexadecimal Number:</label>
+                <input 
+                    type="text" 
+                    id="hexInput" 
+                    placeholder="e.g., FF" 
+                    onkeypress="if(event.key === 'Enter') convertHexToDecimal()"
+                >
+            </div>
+            <button class="convert-btn" onclick="convertHexToDecimal()">Convert to Decimal</button>
+        </div>
+
+        <!-- Binary Information -->
+        <div id="binary-info" class="converter-section">
+            <div class="input-group">
+                <label for="infoInput">Enter Decimal Number:</label>
+                <input 
+                    type="number" 
+                    id="infoInput" 
+                    placeholder="e.g., 42" 
+                    onkeypress="if(event.key === 'Enter') getBinaryInfo()"
+                >
+            </div>
+            <button class="convert-btn" onclick="getBinaryInfo()">Get Binary Info</button>
+        </div>
+
+        <!-- Result -->
+        <div id="resultSection" class="result-section">
+            <div class="result-item">
+                <div class="result-label">Input</div>
+                <div class="result-value" id="inputValue"></div>
+            </div>
+            <div class="result-item">
+                <div class="result-label" id="outputLabel"></div>
+                <div class="result-value" id="outputValue">
+                    <span id="outputValueText"></span>
+                    <button class="copy-btn" onclick="copyToClipboard()">Copy</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conversion History -->
+        <div class="conversion-history hidden">
+            <div class="history-title">📋 Recent Conversions</div>
+            <div id="historyList"></div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="info-box">
+            <strong>💡 Tips & Shortcuts</strong><br>
+            • Press <strong>Enter</strong> to convert instantly<br>
+            • Use <strong>Ctrl+1/2/3/4/5</strong> to switch tabs<br>
+            • Click <strong>Copy</strong> to copy results to clipboard<br>
+            • Use maximum 32-bit numbers for best performance
+        </div>
+
+        <div class="footer">
+            <p>Made with 💜 | Number Systems Converter v2.1 | Ultra Fast</p>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'dec-to-bin';
+        let history = [];
+
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // Hide all sections
+            document.getElementById('dec-to-bin').classList.remove('active');
+            document.getElementById('bin-to-dec').classList.remove('active');
+            
+            // Show selected section
+            document.getElementById(tab).classList.add('active');
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Clear results
+            document.getElementById('resultSection').classList.remove('active');
+            hideError();
+        }
+
+        function convertDecimalToBinary() {
+            const input = document.getElementById('decimalInput').value;
+            
+            if (!input) {
+                showError('Please enter a decimal number');
+                return;
+            }
+            
+            fetch('/convert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    type: 'dec_to_bin',
+                    value: input
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    showResult(data.input, data.output, 'Binary');
+                    addToHistory(`${data.input} (Decimal) → ${data.output} (Binary)`);
+                    hideError();
+                }
+            })
+            .catch(error => showError('Conversion failed'));
+        }
+
+        function convertBinaryToDecimal() {
+            const input = document.getElementById('binaryInput').value;
+            
+            if (!input) {
+                showError('Please enter a binary number');
+                return;
+            }
+            
+            fetch('/convert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    type: 'bin_to_dec',
+                    value: input
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    showResult(data.input, data.output, 'Decimal');
+                    addToHistory(`${data.input} (Binary) → ${data.output} (Decimal)`);
+                    hideError();
+                }
+            })
+            .catch(error => showError('Conversion failed'));
+        }
+
+        function convertDecimalToHex() {
+            const input = document.getElementById('decimalInputHex').value;
+            
+            if (!input) {
+                showError('Please enter a decimal number');
+                return;
+            }
+            
+            fetch('/convert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    type: 'dec_to_hex',
+                    value: input
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    showResult(data.input, data.output, 'Hexadecimal');
+                    addToHistory(`${data.input} (Decimal) → ${data.output} (Hex)`);
+                    hideError();
+                }
+            })
+            .catch(error => showError('Conversion failed'));
+        }
+
+        function convertHexToDecimal() {
+            const input = document.getElementById('hexInput').value;
+            
+            if (!input) {
+                showError('Please enter a hexadecimal number');
+                return;
+            }
+            
+            fetch('/convert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    type: 'hex_to_dec',
+                    value: input
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    showResult(data.input, data.output, 'Decimal');
+                    addToHistory(`${data.input} (Hex) → ${data.output} (Decimal)`);
+                    hideError();
+                }
+            })
+            .catch(error => showError('Conversion failed'));
+        }
+
+        function getBinaryInfo() {
+            const input = document.getElementById('infoInput').value;
+            
+            if (!input) {
+                showError('Please enter a decimal number');
+                return;
+            }
+            
+            fetch('/convert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    type: 'binary_info',
+                    value: input
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    showBinaryInfo(data.info);
+                    hideError();
+                }
+            })
+            .catch(error => showError('Failed to get info'));
+        }
+
+        function showBinaryInfo(info) {
+            const resultDiv = document.getElementById('resultSection');
+            resultDiv.innerHTML = `
+                <div class="result-item">
+                    <div class="result-label">NUMBER INFORMATION</div>
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="info-card-label">Decimal</div>
+                            <div class="info-card-value">${info.decimal}</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-card-label">Hexadecimal</div>
+                            <div class="info-card-value">0x${info.hex}</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-card-label">Octal</div>
+                            <div class="info-card-value">0o${info.octal}</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-card-label">Bit Count</div>
+                            <div class="info-card-value">${info.bits}</div>
+                        </div>
+                        <div class="info-card info-full">
+                            <div class="info-card-label">Binary</div>
+                            <div class="info-card-value">${info.binary}</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-card-label">Ones (1s)</div>
+                            <div class="info-card-value">${info.ones}</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-card-label">Zeros (0s)</div>
+                            <div class="info-card-value">${info.zeros}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            resultDiv.classList.add('active');
+        }
+
+        function showResult(input, output, type) {
+            document.getElementById('inputValue').textContent = input;
+            document.getElementById('outputLabel').textContent = type.toUpperCase();
+            document.getElementById('outputValueText').textContent = output;
+            document.getElementById('resultSection').innerHTML = `
+                <div class="result-item">
+                    <div class="result-label">Input</div>
+                    <div class="result-value" id="inputValue">${input}</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label" id="outputLabel">${type.toUpperCase()}</div>
+                    <div class="result-value">
+                        <span id="outputValueText">${output}</span>
+                        <button class="copy-btn" onclick="copyToClipboard()">Copy</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('resultSection').classList.add('active');
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('active');
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').classList.remove('active');
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById('outputValueText').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        function addToHistory(conversion) {
+            history.unshift(conversion);
+            if (history.length > 5) {
+                history.pop();
+            }
+            
+            if (history.length > 0) {
+                document.querySelector('.conversion-history').classList.remove('hidden');
+                const historyList = document.getElementById('historyList');
+                historyList.innerHTML = history.map(item => 
+                    `<div class="history-item">${item}</div>`
+                ).join('');
+            }
+        }
+
+        // Focus on first input on load
+        window.addEventListener('load', () => {
+            document.getElementById('decimalInput').focus();
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === '1') {
+                    e.preventDefault();
+                    switchTab('dec-to-bin');
+                } else if (e.ctrlKey && e.key === '2') {
+                    e.preventDefault();
+                    switchTab('bin-to-dec');
+                } else if (e.ctrlKey && e.key === '3') {
+                    e.preventDefault();
+                    switchTab('dec-to-hex');
+                } else if (e.ctrlKey && e.key === '4') {
+                    e.preventDefault();
+                    switchTab('hex-to-dec');
+                } else if (e.ctrlKey && e.key === '5') {
+                    e.preventDefault();
+                    switchTab('binary-info');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
