@@ -61,7 +61,7 @@ Press **Ctrl+C** in the terminal to stop the server.
 
 ## 📁 File Structure
 ```
-dsa.c++/
+cal/
 ├── app.py                    # Flask backend
 ├── requirements.txt          # Python dependencies
 ├── templates/
