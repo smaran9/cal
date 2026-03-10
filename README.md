@@ -32,15 +32,10 @@ You should see:
 ==================================================
 🚀 Decimal to Binary Converter Calculator
 ==================================================
-✅ Server running on: http://localhost:5000
 ⏰ Press Ctrl+C to stop the server
 ==================================================
 ```
 
-### 4. Open in Browser
-Visit: **http://localhost:5000**
-
-That's it! Your calculator app is now live! 🎉
 
 ## 📖 Usage
 
@@ -87,9 +82,6 @@ cal/
 - Try: `python -m pip install --upgrade pip`
 - Then: `pip install -r requirements.txt`
 
-**Can't access localhost:5000?**
-- Make sure Python app is running
-- Try: `http://127.0.0.1:5000`
 
 ---
 
